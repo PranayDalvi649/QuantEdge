@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,42 +7,51 @@
 @layer base {
   body {
     @apply bg-background text-textPrimary font-sans antialiased;
+    background-image: radial-gradient(circle at 50% 0%, rgba(0, 255, 170, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-accentGreen text-background font-bold py-2 px-6 rounded shadow-[0_0_15px_rgba(0,255,136,0.5)] hover:shadow-[0_0_25px_rgba(0,255,136,0.8)] transition-all uppercase tracking-wider text-sm;
+    @apply bg-accentGreen text-background font-bold py-3 px-8 rounded shadow-glow-green hover:shadow-[0_0_30px_rgba(0,255,170,0.8)] hover:scale-105 transition-all duration-300 uppercase tracking-[0.2em] text-sm;
   }
   
   .card-panel {
-    @apply bg-card border border-border rounded-lg p-6 shadow-lg;
+    @apply bg-card border border-border rounded-xl p-6 shadow-glass backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:border-accentGreen/30;
+  }
+  
+  .card-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
   }
 
   .nav-item {
-    @apply flex items-center gap-3 text-textSecondary hover:text-textPrimary hover:bg-white/5 px-4 py-3 rounded-md transition-colors cursor-pointer;
+    @apply flex items-center gap-3 text-textSecondary hover:text-textPrimary hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer;
   }
   .nav-item.active {
-    @apply text-accentGreen border-l-4 border-accentGreen bg-accentGreen/10 pl-3 rounded-l-none;
+    @apply text-accentGreen border-l-4 border-accentGreen bg-accentGreen/10 pl-3 rounded-l-none shadow-[inset_10px_0_20px_-10px_rgba(0,255,170,0.3)];
   }
   
   .table-row-custom {
-    @apply border-b border-border/50 hover:bg-white/5 transition-colors;
+    @apply border-b border-border hover:bg-white/5 transition-all duration-200;
   }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1117; 
+  background: transparent; 
 }
 ::-webkit-scrollbar-thumb {
-  background: #30363d; 
-  border-radius: 4px;
+  background: rgba(255,255,255,0.1); 
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b949e; 
+  background: rgba(255,255,255,0.2); 
 }

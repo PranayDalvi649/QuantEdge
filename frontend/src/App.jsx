@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Bell, Settings, LayoutDashboard, Briefcase, Activity, FileText, User, AlertTriangle, ShieldCheck, CheckCircle2, ChevronRight, Copy } from 'lucide-react';
-
-function App() {
+import { Search, Bell, Settings, LayoutDashboard, Briefcase, Activity, FileText, User, AlertTriangle, ShieldCheck, CheckCircle2, ChevronRight, Copy, TrendingUp } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';function App() {
   const [ticker, setTicker] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -161,6 +160,37 @@ function App() {
                   </div>
                 </div>
 
+                {/* PRICE CHART */}
+                {result.data.chart_data && (
+                  <div className="card-panel">
+                    <h2 className="text-xs uppercase tracking-widest text-textSecondary mb-4 font-semibold flex items-center gap-2">
+                      <TrendingUp size={16} />
+                      30-DAY PRICE ACTION
+                    </h2>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={result.data.chart_data} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#00ffaa" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#00ffaa" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <XAxis dataKey="date" tick={{fontSize: 10, fill: '#8b949e'}} tickFormatter={(val) => val.split('-').slice(1).join('/')} minTickGap={20} axisLine={false} tickLine={false} />
+                          <YAxis domain={['auto', 'auto']} tick={{fontSize: 10, fill: '#8b949e'}} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val}`} />
+                          <Tooltip 
+                            contentStyle={{ backgroundColor: '#101520', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '8px', boxShadow: '0 8px 32px 0 rgba(0,0,0,0.37)' }}
+                            itemStyle={{ color: '#00ffaa', fontWeight: 'bold' }}
+                            labelStyle={{ color: '#8b949e', marginBottom: '4px' }}
+                            formatter={(value) => [`₹${Number(value).toFixed(2)}`, 'Price']}
+                          />
+                          <Area type="monotone" dataKey="price" stroke="#00ffaa" strokeWidth={2} fillOpacity={1} fill="url(#colorPrice)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+
                 {/* TECHNICAL INDICATORS */}
                 <div className="card-panel">
                   <h2 className="text-xs uppercase tracking-widest text-textSecondary mb-4 font-semibold">TECHNICAL INDICATORS</h2>
@@ -174,10 +204,10 @@ function App() {
                       <div key={i} className="grid grid-cols-3 py-4 table-row-custom items-center">
                         <div className="font-medium text-textPrimary">{m.name}</div>
                         <div className="font-mono text-textPrimary">{m.value}</div>
-                        <div className={`text-sm ${
-                          m.signal.includes('Bullish') || m.signal.includes('Above') || m.signal.includes('Support') || m.signal === 'Oversold' 
+                        <div className={`text-sm font-semibold ${
+                          m.signal.includes('Bullish') || m.signal.includes('Above') || m.signal.includes('Support') || m.signal === 'Oversold' || m.signal.includes('Strong Trend')
                           ? 'text-accentGreen' 
-                          : m.signal.includes('Bearish') || m.signal.includes('Below') || m.signal.includes('Resistance') || m.signal === 'Overbought'
+                          : m.signal.includes('Bearish') || m.signal.includes('Below') || m.signal.includes('Resistance') || m.signal === 'Overbought' || m.signal.includes('Weak Trend')
                           ? 'text-accentRed'
                           : 'text-textSecondary'
                         }`}>{m.signal}</div>

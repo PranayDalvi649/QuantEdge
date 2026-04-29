@@ -24,6 +24,8 @@ def analyze(symbol: str) -> dict:
 
         close  = df["Close"]
         volume = df["Volume"]
+        high   = df["High"]
+        low    = df["Low"]
 
         # ── INDICATORS ────────────────────────────────────────────
         rsi = ta.rsi(close, length=14)
@@ -72,6 +74,21 @@ def analyze(symbol: str) -> dict:
         hv_bear = (vol_ratio > 1.5) and (close.iloc[-1] < close.iloc[-2])
         dry_up  = vol_ratio < 0.7
         lv_rally = (close.iloc[-1] > close.iloc[-2]) and dry_up
+
+        # ── NEW INDICATORS ─────────────────────────────────────────
+        stoch = ta.stoch(high, low, close)
+        stoch_k = stoch.iloc[:, 0].iloc[-1] if stoch is not None else 50
+        stoch_d = stoch.iloc[:, 1].iloc[-1] if stoch is not None else 50
+        
+        adx_df = ta.adx(high, low, close)
+        adx = adx_df.iloc[:, 0].iloc[-1] if adx_df is not None and not adx_df.empty else 0
+        
+        atr_df = ta.atr(high, low, close)
+        atr = atr_df.iloc[-1] if atr_df is not None and not atr_df.empty else 0
+
+        # Create price history for chart (last 30 days)
+        recent_df = df.tail(30)
+        chart_data = [{"date": d.strftime('%Y-%m-%d'), "price": p} for d, p in zip(recent_df.index, recent_df["Close"])]
 
         # ── MULTI-TIMEFRAME ───────────────────────────────────────
         tf_align = "UNAVAILABLE"
@@ -132,6 +149,12 @@ def analyze(symbol: str) -> dict:
 
         if tf_align == "ALIGNED_BULL":   score += 2; signals.append("Daily+Hourly aligned bull (+2)")
         elif tf_align == "ALIGNED_BEAR": score -= 2; signals.append("Daily+Hourly aligned bear (-2)")
+
+        if adx > 25 and bull_align: score += 1; signals.append("ADX > 25 (Strong Uptrend) (+1)")
+        elif adx > 25 and bear_align: score -= 1; signals.append("ADX > 25 (Strong Downtrend) (-1)")
+        
+        if stoch_k < 20 and stoch_k > stoch_d: score += 1; signals.append("Stoch Oversold Bullish Cross (+1)")
+        elif stoch_k > 80 and stoch_k < stoch_d: score -= 1; signals.append("Stoch Overbought Bearish Cross (-1)")
 
         score = max(-10, min(10, score))
 
@@ -196,11 +219,15 @@ def analyze(symbol: str) -> dict:
             "vol_state": vol_state,
             "metrics": [
                 {"name": "RSI (14)", "value": f"{rsi_current:.1f}", "signal": rsi_zone},
+                {"name": "Stochastic", "value": f"{stoch_k:.1f}", "signal": "Oversold" if stoch_k < 20 else "Overbought" if stoch_k > 80 else "Neutral"},
                 {"name": "MACD", "value": f"{macd_cur:.3f}", "signal": macd_state},
+                {"name": "ADX", "value": f"{adx:.1f}", "signal": "Strong Trend" if adx > 25 else "Weak Trend"},
+                {"name": "ATR", "value": f"{atr:.2f}", "signal": "Volatility"},
                 {"name": "EMA 20", "value": f"{e20:.2f}", "signal": "Support" if above20 else "Resistance"},
                 {"name": "EMA 50", "value": f"{e50:.2f}", "signal": "Support" if above50 else "Resistance"},
                 {"name": "Volume", "value": f"{vol_ratio:.2f}x avg", "signal": "Above Average" if vol_ratio > 1 else "Below Average"},
             ],
+            "chart_data": chart_data,
             "scored_signals": signals,
             "score": score,
             "decision": decision,
