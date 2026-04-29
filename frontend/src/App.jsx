@@ -14,7 +14,7 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/analyze?ticker=${ticker}`);
+      const response = await fetch(`/api/analyze?ticker=${ticker}`);
       const data = await response.json();
       
       if (data.error) {
